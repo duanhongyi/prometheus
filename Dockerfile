@@ -13,7 +13,7 @@ RUN groupadd drycc --gid ${DRYCC_GID} \
   && useradd drycc -u ${DRYCC_UID} -g ${DRYCC_GID} -s /bin/bash -m -d ${DRYCC_HOME_DIR} \
   && install-stack python $PYTHON_VERSION \
   && . init-stack \
-  && set -eux; pip3 install --disable-pip-version-check sanic aiohttp 2>/dev/null; set +eux \
+  && set -eux; pip3 install --disable-pip-version-check sanic aiohttp kubernetes 2>/dev/null; set +eux \
   && install-stack prometheus $PROMETHEUS_VERSION \
   && install-stack node_exporter $NODE_EXPORTER_VERSION \
   && rm -rf \
