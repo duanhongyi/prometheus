@@ -16,7 +16,6 @@ RUN groupadd drycc --gid ${DRYCC_GID} \
   && set -eux; pip3 install --disable-pip-version-check sanic aiohttp 2>/dev/null; set +eux \
   && install-stack prometheus $PROMETHEUS_VERSION \
   && install-stack node_exporter $NODE_EXPORTER_VERSION \
-  && chmod +x /usr/local/bin/start-proxy.py /usr/local/bin/start-backend.sh \
   && rm -rf \
       /usr/share/doc \
       /usr/share/man \

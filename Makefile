@@ -23,11 +23,11 @@ check-docker:
 	fi
 
 docker-build:
-	docker build ${DOCKER_BUILD_FLAGS} -t ${IMAGE} rootfs
+	docker build ${DOCKER_BUILD_FLAGS} -t ${IMAGE} .
 	docker tag ${IMAGE} ${MUTABLE_IMAGE}
 
 docker-buildx:
-	docker buildx build --platform ${PLATFORM} -t ${IMAGE} rootfs --push
+	docker buildx build --platform ${PLATFORM} -t ${IMAGE} . --push
 
 clean: check-docker
 	docker rmi $(IMAGE)
