@@ -1,19 +1,36 @@
 import sys
 import logging
 import getopt
+import aiohttp
 from sanic import Sanic
+from .adapters import INGRESS_ADAPTERS
 
 
 app = Sanic(__name__)
 logger = logging.getLogger(__name__)
 
 
-def nginx_exproter_paster():
-    pass
+@app.listener('before_server_start')
+def init(app, loop):
+    app.ctx.http = aiohttp.ClientSession(loop=loop, auto_decompress=False)
 
 
-def traefik_exproter_paster():
-    pass
+@app.listener('after_server_stop')
+def finish(app, loop):
+    loop.run_until_complete(app.ctx.http.close())
+    loop.close()
+
+
+@app.route(
+    '/ingresses/<name>/metrics',
+    methods=["GET", "HEAD", "OPTIONS"]
+)
+async def ingress(request, name):
+    if name in INGRESS_ADAPTERS:
+        adapter = INGRESS_ADAPTERS[name](request)
+        await adapter.metrics()
+    else:
+        await request.respond(status=404)
 
 
 if __name__ == '__main__':
@@ -30,6 +47,4 @@ if __name__ == '__main__':
             port = int(value)
         elif name in('-w', '--workers'):
             workers = int(value)
-    waiting_for_backends()
-    app.add_task(check_health_task)
     app.run(host=host, port=port, workers=workers)
