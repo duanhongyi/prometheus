@@ -26,8 +26,24 @@ def finish(app, loop):
     methods=["GET", "HEAD", "OPTIONS"]
 )
 async def ingress(request, name):
+    """
+    # HELP ingress_open_connections current number of client connections.
+    # TYPE ingress_open_connections gauge
+    ingress_open_connections 1
+    # HELP ingress_service_request_duration_seconds The request processing time in milliseconds.
+    # TYPE ingress_service_request_duration_seconds histogram
+    ingress_service_request_duration_seconds_bucket{namespace="drycc",service="drycc-grafana",method="GET",status="200",le="0.1"} 1
+    ingress_service_request_duration_seconds_sum{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
+    ingress_service_request_duration_seconds_count{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
+    # 
+    ingress_service_requests_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
+
+    ingress_service_requests_bytes_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
+
+    ingress_service_responses_bytes_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
+    """
     if name in INGRESS_ADAPTERS:
-        adapter = INGRESS_ADAPTERS[name](request)
+        adapter = INGRESS_ADAPTERS[name](app, request)
         await adapter.metrics()
     else:
         await request.respond(status=404)

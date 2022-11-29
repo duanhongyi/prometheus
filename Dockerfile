@@ -12,10 +12,10 @@ COPY . /
 RUN groupadd drycc --gid ${DRYCC_GID} \
   && useradd drycc -u ${DRYCC_UID} -g ${DRYCC_GID} -s /bin/bash -m -d ${DRYCC_HOME_DIR} \
   && install-stack python $PYTHON_VERSION \
-  && . init-stack \
-  && set -eux; pip3 install --disable-pip-version-check -r requirements.txt 2>/dev/null; set +eux \
   && install-stack prometheus $PROMETHEUS_VERSION \
   && install-stack node_exporter $NODE_EXPORTER_VERSION \
+  && . init-stack \
+  && set -eux; pip3 install --disable-pip-version-check -r requirements.txt 2>/dev/null; set +eux \
   && rm -rf \
       /usr/share/doc \
       /usr/share/man \
@@ -36,5 +36,5 @@ VOLUME ${DRYCC_HOME_DIR}
 
 USER ${DRYCC_UID}
 
-# Expose the proxy port
-EXPOSE 80
+# Expose the gateway port
+EXPOSE 8000
