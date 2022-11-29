@@ -1,0 +1,22 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- if (index .Values "exporters" "node-exporter" "enabled") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: drycc-node-exporter
+  annotations:
+    prometheus.io/scrape: "true"
+    {{- with (index .Values "node-exporter" "annotations") }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    heritage: drycc
+spec:
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+  selector:
+    app: drycc-node-exporter
+{{- end }}
+{{- end }}

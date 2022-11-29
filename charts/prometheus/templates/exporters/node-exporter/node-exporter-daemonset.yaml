@@ -1,0 +1,95 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- if (index .Values "exporters" "node-exporter" "enabled") }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: drycc-node-exporter
+  labels:
+    heritage: drycc
+  annotations:
+    component.drycc.cc/version: {{ index .Values "node-exporter" "imageTag" }}
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: drycc-node-exporter
+  template:
+    metadata:
+      labels:
+        app: drycc-node-exporter
+    spec:
+      containers:
+        - name: drycc-node-exporter
+          image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/node-exporter:{{ .Values.imageTag }}
+          imagePullPolicy: {{.Values.imagePullPolicy}}
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            {{- if (index .Values "node-exporter" "hostRootFsMount" "enabled") }}
+            - --path.rootfs=/host/root
+            {{- end }}
+            - --web.listen-address=[$(HOST_IP)]:9100
+          env:
+            - name: HOST_IP
+              {{- if (index .Values "node-exporter" "service" "listenOnAllInterfaces") }}
+              value: 0.0.0.0
+              {{- else }}
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+              {{- end }}
+            {{- range $key, $value := index .Values "node-exporter" "env" }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 9100
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9100
+              scheme: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 9100
+              scheme: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          {{- with index .Values "node-exporter" "resources" }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+      hostNetwork: {{ index .Values "node-exporter" "hostNetwork" }}
+      hostPID: {{ index .Values "node-exporter" "hostPID" }}
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+{{- end }}
+{{- end }}

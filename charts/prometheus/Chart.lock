@@ -1,0 +1,6 @@
+dependencies:
+- name: common
+  repository: oci://registry.drycc.cc/charts
+  version: 1.1.1
+digest: sha256:43c7aef27f5d1f6fd43405bf098d920171093679cc54db1b4c7a67fc46ff5441
+generated: "2022-11-29T10:48:01.012966412+08:00"

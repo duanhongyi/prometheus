@@ -1,0 +1,125 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- $platformDomain := .Values.global.platformDomain }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: drycc-prometheus
+  labels:
+    heritage: drycc
+  annotations:
+    component.drycc.cc/version: {{ .Values.imageTag }}
+spec:
+  serviceName: drycc-prometheus-headless
+  replicas: {{ .Values.prometheus.replicas }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: drycc-prometheus
+  template:
+    metadata:
+      labels:
+        app: drycc-prometheus
+    spec:
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAffinityPreset.type "key" .Values.prometheus.podAffinityPreset.key "values" .Values.prometheus.podAffinityPreset.values ) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAntiAffinityPreset.type "key" .Values.prometheus.podAntiAffinityPreset.key "values" .Values.prometheus.podAntiAffinityPreset.values ) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.prometheus.nodeAffinityPreset.type "key" .Values.prometheus.nodeAffinityPreset.key "values" .Values.prometheus.nodeAffinityPreset.values ) | nindent 10 }}
+      containers:
+      {{- if .Values.configmapReload.prometheus.enabled }}
+      - name: drycc-prometheus-configmap-reload
+        image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/configmap-reload:{{ .Values.imageTag }}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        args:
+          - --volume-dir=/opt/drycc/prometheus/config
+          - --webhook-url=http://127.0.0.1:9090/-/reload
+        volumeMounts:
+          - name: config-volume
+            mountPath: /opt/drycc/prometheus/config
+            readOnly: true
+      {{- end }}
+      - name: drycc-prometheus
+        image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
+        imagePullPolicy: {{.Values.imagePullPolicy}}
+        args:
+          - --web.route-prefix=/
+          - --storage.tsdb.retention.time={{ .Values.prometheus.retention }}
+          - --config.file=/opt/drycc/prometheus/prometheus.yaml
+          - --storage.tsdb.path=/data
+          - --web.console.libraries=/opt/drycc/console_libraries
+          - --web.console.templates=/opt/drycc/prometheus/consoles
+          {{- range .Values.prometheus.extraFlags }}
+          - --{{ . }}
+          {{- end }}
+          {{- range $key, $value := .Values.prometheus.extraArgs }}
+          - --{{ $key }}={{ $value }}
+          {{- end }}
+          - --web.external-url=http://prometheus.{{ $platformDomain }}
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /-/healthy
+            port: web
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        ports:
+        - containerPort: 9090
+          name: web
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /-/ready
+            port: web
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        resources: {}
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /-/ready
+            port: web
+            scheme: HTTP
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 3
+        volumeMounts:
+          - name: config-volume
+            mountPath: /opt/drycc/prometheus/config
+          - name: prometheus-data
+            mountPath: /data
+            subPath: ""
+      volumes:
+        - name: config-volume
+        {{- if empty .Values.prometheus.configFromSecret }}
+          configMap:
+            name: prometheus-config
+        {{- else }}
+          secret:
+            secretName: prometheus-config
+        {{- end }}
+  {{- if .Values.prometheus.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: prometheus-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      {{- if .Values.prometheus.persistence.storageClass }}
+      {{- if (eq "-" .Values.prometheus.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.prometheus.persistence.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.prometheus.persistence.size | quote }}
+  {{- end }}
+{{- end }}

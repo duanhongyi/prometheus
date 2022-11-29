@@ -1,0 +1,22 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- if (index .Values "exporters" "kube-state-metrics" "enabled") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: drycc-kube-state-metrics
+  annotations:
+    prometheus.io/scrape: "true"
+    {{- with index .Values "kube-state-metrics" "service" "annotations" }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    heritage: drycc
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: drycc-kube-state-metrics
+{{- end }}
+{{- end }}

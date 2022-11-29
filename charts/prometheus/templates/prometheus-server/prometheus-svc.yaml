@@ -1,0 +1,20 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: drycc-prometheus
+  annotations:
+    {{- with .Values.prometheus.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    heritage: drycc
+spec:
+  ports:
+    - name: http
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    app: drycc-prometheus
+{{- end }}

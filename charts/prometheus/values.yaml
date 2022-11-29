@@ -1,0 +1,178 @@
+imageOrg: "drycc"
+imagePullPolicy: "Always"
+imageTag: "canary"
+imageRegistry: "registry.drycc.cc"
+
+
+## Monitors ConfigMap changes and POSTs to a URL
+## Ref: https://github.com/jimmidyson/configmap-reload
+##
+configmapReload:
+  prometheus:
+    ## If false, the configmap-reload container will not be deployed
+    enabled: true
+    ## configmap-reload container image
+    image:
+      repository: jimmidyson/configmap-reload
+      tag: v0.5.0
+      pullPolicy: IfNotPresent
+    resources: {}
+
+prometheus:
+  replicas: 1
+  retention: 15d
+  # persistence config
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    size: 10Gi
+    storageClass: ""
+  extraFlags:
+    - web.enable-lifecycle
+    ## web.enable-admin-api flag controls access to the administrative HTTP API which includes functionality such as
+    ## deleting time series. This is disabled by default.
+    # - web.enable-admin-api
+    ##
+    ## storage.tsdb.no-lockfile flag controls BD locking
+    # - storage.tsdb.no-lockfile
+    ##
+    ## storage.tsdb.wal-compression flag enables compression of the write-ahead log (WAL)
+    # - storage.tsdb.wal-compression
+  ## Additional Prometheus server container arguments
+  ##
+  extraArgs: {}
+  nodeAffinityPreset:
+    key: "drycc.cc/node"
+    type: "soft"
+    values:
+    - "true"
+  podAffinityPreset:
+    key: "security"
+    type: ""
+    values:
+    - "drycc-security"
+  podAntiAffinityPreset:
+    key: "app"
+    type: "soft"
+    values:
+    - "drycc-prometheus"
+  # Service
+  service:
+    # Provide any additional service annotations
+    annotations: {}
+
+## Exporters
+##
+exporters:
+  node-exporter:
+    ## @param exporters.node-exporter.enabled Enable node-exporter
+    ##
+    enabled: true
+  kube-state-metrics:
+    ## @param exporters.kube-state-metrics.enabled Enable kube-state-metrics
+    ##
+    enabled: true
+
+## node-exporter configuration##
+node-exporter:
+  service:
+    listenOnAllInterfaces: []
+    labels:
+      jobLabel: node-exporter
+  # Expose the service to the host network
+  hostNetwork: true
+  # Share the host process ID namespace
+  hostPID: true
+  hostRootFsMount:
+    enabled: true
+  annotations: {}
+  resources: {}
+    # limits:
+    #   cpu: 200m
+    #   memory: 50Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 30Mi
+
+## kube-state-metrics configuration
+##
+kube-state-metrics:
+  nodeAffinityPreset:
+    key: "drycc.cc/node"
+    type: "soft"
+    values:
+    - "true"
+  podAffinityPreset:
+    key: "security"
+    type: ""
+    values:
+    - "drycc-security"
+  podAntiAffinityPreset:
+    key: "app"
+    type: "soft"
+    values:
+    - "drycc-kube-state-metrics"
+  # Service
+  service:
+    # Provide any additional service annotations
+    annotations: {}
+  # Available collectors for kube-state-metrics.
+  # By default, all available resources are enabled, comment out to disable.
+  collectors:
+    - certificatesigningrequests
+    - configmaps
+    - cronjobs
+    - daemonsets
+    - deployments
+    - endpoints
+    - horizontalpodautoscalers
+    - ingresses
+    - jobs
+    - leases
+    - limitranges
+    - mutatingwebhookconfigurations
+    - namespaces
+    - networkpolicies
+    - nodes
+    - persistentvolumeclaims
+    - persistentvolumes
+    - poddisruptionbudgets
+    - pods
+    - replicasets
+    - replicationcontrollers
+    - resourcequotas
+    - secrets
+    - services
+    - statefulsets
+    - storageclasses
+    - validatingwebhookconfigurations
+    - volumeattachments
+    # - verticalpodautoscalers # not a default resource, see also: https://github.com/kubernetes/kube-state-metrics#enabling-verticalpodautoscalers
+
+global:
+  # Admin email, used for each component to send email to administrator
+  email: "drycc@drycc.cc"
+  # Set the storage backend
+  #
+  # Valid values are:
+  # - s3: Store persistent data in AWS S3 (configure in S3 section)
+  # - azure: Store persistent data in Azure's object storage
+  # - gcs: Store persistent data in Google Cloud Storage
+  # - minio: Store persistent data on in-cluster Minio server
+  storage: minio
+  #
+  rbac: false
+  # Please check `kubernetes.io/ingress.class`
+  ingressClass: ""
+  # A domain name consists of one or more parts.
+  # Periods (.) are used to separate these parts.
+  # Each part must be 1 to 63 characters in length and can contain lowercase letters, digits, and hyphens (-).
+  # It must start and end with a lowercase letter or digit.
+  clusterDomain: "cluster.local"
+  # The public resolvable hostname to build your cluster with.
+  #
+  # This will be the hostname that is used to build endpoints such as "drycc.$HOSTNAME"
+  platformDomain: ""
+  # Whether cert_manager is enabled to automatically generate controller certificates
+  certManagerEnabled: true
+  prometheusLocation: "on-cluster"

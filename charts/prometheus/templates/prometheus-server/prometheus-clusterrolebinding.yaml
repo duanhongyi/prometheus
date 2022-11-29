@@ -1,0 +1,17 @@
+{{- if and .Values.prometheus.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: drycc-prometheus
+    heritage: drycc
+  name: {{ printf "%s:drycc-prometheus" .Release.Namespace | quote }}
+subjects:
+- kind: ServiceAccount
+  name: drycc-prometheus
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ printf "%s:drycc-prometheus" .Release.Namespace | quote }}
+{{- end }}
