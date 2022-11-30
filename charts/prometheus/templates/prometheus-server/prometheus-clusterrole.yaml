@@ -1,11 +1,11 @@
-{{- if and .Values.prometheus.enabled }}
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: drycc-prometheus
   labels:
     app: drycc-prometheus
     heritage: drycc
-  name: drycc-prometheus
 rules:
   - apiGroups:
       - ""

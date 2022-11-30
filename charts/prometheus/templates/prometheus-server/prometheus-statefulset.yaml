@@ -98,13 +98,8 @@ spec:
             subPath: ""
       volumes:
         - name: config-volume
-        {{- if empty .Values.prometheus.configFromSecret }}
           configMap:
-            name: prometheus-config
-        {{- else }}
-          secret:
-            secretName: prometheus-config
-        {{- end }}
+            name: drycc-prometheus
   {{- if .Values.prometheus.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:

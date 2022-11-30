@@ -7,7 +7,7 @@ metadata:
   labels:
     heritage: drycc
   annotations:
-    component.drycc.cc/version: {{ index .Values "kube-state-metrics" "imageTag" }}
+    component.drycc.cc/version: {{ index .Values "imageTag" }}
 spec:
   selector:
     matchLabels:
@@ -21,13 +21,13 @@ spec:
         app: drycc-kube-state-metrics
     spec:
       affinity:
-#        podAffinity: {{- include "common.affinities.pods" (dict "type" (index .Values "kube-state-metrics" "podAffinityPreset" "type") "key" (index .Values "kube-state-metrics" "podAffinityPreset" "key") "values" (index .Values "kube-state-metrics" "podAffinityPreset" "values") ) | nindent 10 }}
-#        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" (index .Values "kube-state-metrics" "podAntiAffinityPreset" "type") "key" (index .Values "kube-state-metrics" "podAntiAffinityPreset" "key") "values" (index .Values "kube-state-metrics" "podAntiAffinityPreset" "values") ) | nindent 10 }}
-#        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" (index .Values "kube-state-metrics" "nodeAffinityPreset "type") "key" (index .Values "kube-state-metrics" "nodeAffinityPreset" "key") "values" (index .Values "kube-state-metrics" "nodeAffinityPreset" "values") ) | nindent 10 }}
+        podAffinity: {{- include "common.affinities.pods" (dict "type" ( index .Values "kube-state-metrics" "podAffinityPreset" "type") "key" ( index .Values "kube-state-metrics" "podAffinityPreset" "key") "values" ( index .Values "kube-state-metrics" "podAffinityPreset" "values" ) ) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" ( index .Values "kube-state-metrics" "podAntiAffinityPreset" "type") "key" ( index .Values "kube-state-metrics" "podAntiAffinityPreset" "key") "values" ( index .Values "kube-state-metrics" "podAntiAffinityPreset" "values" ) ) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" ( index .Values "kube-state-metrics" "nodeAffinityPreset" "type") "key" ( index .Values "kube-state-metrics" "nodeAffinityPreset" "key") "values" ( index .Values "kube-state-metrics" "nodeAffinityPreset" "values" ) ) | nindent 10 }}
       hostNetwork: {{ index .Values "kube-state-metrics" "hostNetwork" }}
       containers:
-      - name: drycc-kube-state-metrics.name
-        image: { { .Values.imageRegistry } }/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
+      - name: drycc-kube-state-metrics
+        image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         args:
         {{-  if (index .Values "kube-state-metrics" "extraArgs") }}
@@ -43,10 +43,10 @@ spec:
         {{- if (index .Values "kube-state-metrics" "metricAnnotationsAllowList") }}
         - --metric-annotations-allowlist={{ index .Values "kube-state-metrics" "metricAnnotationsAllowList" | join "," }}
         {{- end }}
-        {{- if (index .Values "kube-state-metrics" "metricAllowlist" }}
+        {{- if (index .Values "kube-state-metrics" "metricAllowlist") }}
         - --metric-allowlist={{ index .Values "kube-state-metrics" "metricAllowlist" | join "," }}
         {{- end }}
-        {{- if (index .Values "kube-state-metrics" "metricDenylist" }}
+        {{- if (index .Values "kube-state-metrics" "metricDenylist") }}
         - --metric-denylist={{ index .Values "kube-state-metrics" "metricDenylist" | join "," }}
         {{- end }}
         {{- $namespaces := list }}
@@ -56,7 +56,7 @@ spec:
         {{- end }}
         {{- end }}
         {{- if (index .Values "kube-state-metrics" "releaseNamespace") }}
-        {{- $namespaces = append $namespaces ( include "kube-state-metrics.namespace" . ) }}
+        {{- $namespaces = append $namespaces ( .Release.Namespace ) }}
         {{- end }}
         {{- if $namespaces }}
         - --namespaces={{ $namespaces | mustUniq | join "," }}
@@ -64,10 +64,8 @@ spec:
         {{- if (index .Values "kube-state-metrics" "namespacesDenylist") }}
         - --namespaces-denylist={{ tpl (index .Values "kube-state-metrics" "namespacesDenylist" | join ",") $ }}
         {{- end }}
-        {{- if (index .Values "kube-state-metrics" "autosharding" "enabled") }}
         - --pod=$(POD_NAME)
         - --pod-namespace=$(POD_NAMESPACE)
-        {{- end }}
         {{- if (index .Values "kube-state-metrics" "kubeconfig" "enabled") }}
         - --kubeconfig=/opt/k8s/.kube/config
         {{- end }}
