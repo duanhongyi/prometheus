@@ -9,8 +9,7 @@ PLATFORM ?= linux/amd64,linux/arm64
 
 include versioning.mk
 
-SHELL_SCRIPTS = $(wildcard _scripts/*.sh contrib/ci/*.sh rootfs/usr/local/bin/*.sh)
-TEST_ENV_PREFIX := docker run --rm -v ${CURDIR}:/bash -w /bash ${DEV_REGISTRY}/drycc/go-dev
+TEST_ENV_PREFIX := docker run --rm -v ${CURDIR}:/bash -w /bash ${DEV_REGISTRY}/drycc/python-dev
 
 build: docker-build
 push: docker-push
@@ -35,7 +34,7 @@ clean: check-docker
 test: test-style
 
 test-style:
-	${TEST_ENV_PREFIX} shellcheck $(SHELL_SCRIPTS)
+	${TEST_ENV_PREFIX} bash -c "set -eou pipefail; flake8 --exclude .venv --show-source"
 
 .PHONY: build push docker-build clean upgrade deploy test test-style
 
