@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: drycc-node-exporter
-          image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/node-exporter:{{ .Values.imageTag }}
+          image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
           imagePullPolicy: {{.Values.imagePullPolicy}}
           args:
             - --path.procfs=/host/proc

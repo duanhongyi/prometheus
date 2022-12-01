@@ -6,7 +6,8 @@ ENV DRYCC_UID=1001 \
   PYTHON_VERSION="3.10.6" \
   PROMETHEUS_VERSION="2.40.3" \
   NODE_EXPORTER_VERSION="1.4.0" \
-  KUBE_STATE_METRICS="2.7.0"
+  KUBE_STATE_METRICS="2.7.0" \
+  CONFIGMAP_RELOAD="0.8.0"
 
 COPY . /
 
@@ -16,6 +17,7 @@ RUN groupadd drycc --gid ${DRYCC_GID} \
   && install-stack prometheus $PROMETHEUS_VERSION \
   && install-stack node_exporter $NODE_EXPORTER_VERSION \
   && install-stack kube-state-metrics $KUBE_STATE_METRICS \
+  && install-stack configmap-reload $CONFIGMAP_RELOAD \
   && . init-stack \
   && set -eux; pip3 install --disable-pip-version-check -r requirements.txt 2>/dev/null; set +eux \
   && chmod +x /usr/local/bin/start-proxy.py /usr/local/bin/start-backend.sh \

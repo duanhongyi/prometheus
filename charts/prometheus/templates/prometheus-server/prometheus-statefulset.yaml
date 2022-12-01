@@ -31,7 +31,7 @@ spec:
       containers:
       {{- if .Values.configmapReload.prometheus.enabled }}
       - name: drycc-prometheus-configmap-reload
-        image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/configmap-reload:{{ .Values.imageTag }}
+        image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         args:
           - --volume-dir=/opt/drycc/prometheus/config
