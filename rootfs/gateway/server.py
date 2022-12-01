@@ -35,11 +35,11 @@ async def ingress(request, name):
     ingress_service_request_duration_seconds_bucket{namespace="drycc",service="drycc-grafana",method="GET",status="200",le="0.1"} 1
     ingress_service_request_duration_seconds_sum{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
     ingress_service_request_duration_seconds_count{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
-    # 
+    # TYPE ingress_service_requests_total counter
     ingress_service_requests_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
-
+    # counter
     ingress_service_requests_bytes_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
-
+    # counter
     ingress_service_responses_bytes_total{namespace="drycc",service="drycc-grafana",method="GET",status="200"} 1
     """
     if name in INGRESS_ADAPTERS:
