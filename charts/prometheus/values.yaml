@@ -3,7 +3,6 @@ imagePullPolicy: "Always"
 imageTag: "canary"
 imageRegistry: "registry.drycc.cc"
 
-
 ## Monitors ConfigMap changes and POSTs to a URL
 ## Ref: https://github.com/jimmidyson/configmap-reload
 ##
@@ -11,11 +10,6 @@ configmapReload:
   prometheus:
     ## If false, the configmap-reload container will not be deployed
     enabled: true
-    ## configmap-reload container image
-    image:
-      repository: jimmidyson/configmap-reload
-      tag: v0.5.0
-      pullPolicy: IfNotPresent
     resources: {}
 
 prometheus:
@@ -166,7 +160,7 @@ kube-state-metrics:
 ## Prometheus server ConfigMap entries
 ##
 prometheusFiles:
-  prometheus.yml:
+  prometheus.yaml:
     global:
       ## How frequently to scrape targets by default
       ##

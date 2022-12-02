@@ -34,6 +34,7 @@ spec:
         image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         args:
+          - configmap-reload
           - --volume-dir=/opt/drycc/prometheus/config
           - --webhook-url=http://127.0.0.1:9090/-/reload
         volumeMounts:
@@ -45,9 +46,10 @@ spec:
         image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         args:
+          - prometheus
           - --web.route-prefix=/
           - --storage.tsdb.retention.time={{ .Values.prometheus.retention }}
-          - --config.file=/opt/drycc/prometheus/prometheus.yaml
+          - --config.file=/opt/drycc/prometheus/config/prometheus.yaml
           - --storage.tsdb.path=/data
           - --web.console.libraries=/opt/drycc/console_libraries
           - --web.console.templates=/opt/drycc/prometheus/consoles

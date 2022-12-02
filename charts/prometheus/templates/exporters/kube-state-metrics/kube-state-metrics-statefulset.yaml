@@ -30,6 +30,7 @@ spec:
         image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
         imagePullPolicy: {{.Values.imagePullPolicy}}
         args:
+        - kube-state-metrics
         {{-  if (index .Values "kube-state-metrics" "extraArgs") }}
         {{- index .Values "kube-state-metrics" "extraArgs" | toYaml | nindent 8 }}
         {{-  end  }}
