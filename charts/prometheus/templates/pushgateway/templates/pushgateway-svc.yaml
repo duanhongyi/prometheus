@@ -1,0 +1,23 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: drycc-pushgateway
+  annotations:
+    prometheus.io/probe: pushgateway
+    {{- with .Values.pushgateway.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    heritage: drycc
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 9091
+      targetPort: 9091
+      protocol: TCP
+      name: http
+  selector:
+    app: drycc-pushgateway
+{{- end }}

@@ -1,0 +1,84 @@
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: drycc-pushgateway
+  labels:
+    heritage: drycc
+  annotations:
+    component.drycc.cc/version: {{ .Values.pushgateway.imageTag }}
+spec:
+  replicas: {{ .Values.pushgateway.replicas }}
+  serviceName: drycc-pushgateway
+  selector:
+    matchLabels:
+      app: drycc-pushgateway
+  template:
+    metadata:
+      labels:
+        app: drycc-pushgateway
+    spec:
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.pushgateway.podAffinityPreset.type "key" .Values.pushgateway.podAffinityPreset.key "values" .Values.pushgateway.podAffinityPreset.values ) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.pushgateway.podAntiAffinityPreset.type "key" .Values.pushgateway.podAntiAffinityPreset.key "values" .Values.pushgateway.podAntiAffinityPreset.values ) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.pushgateway.nodeAffinityPreset.type "key" .Values.pushgateway.nodeAffinityPreset.key "values" .Values.pushgateway.nodeAffinityPreset.values ) | nindent 10 }}
+      serviceAccount: drycc-pushgateway
+      containers:
+        - name: pushgateway
+          image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
+          imagePullPolicy: {{.Values.imagePullPolicy}}
+          {{- if .Values.pushgateway.extraArgs }}
+          args:
+            {{ toYaml .Values.pushgateway.extraArgs }}
+          {{- end }}
+          ports:
+            - name: metrics
+              containerPort: 9091
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /-/ready
+              port: 9091
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /-/ready
+              port: 9091
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
+          volumeMounts:
+            - name: pushgateway-data
+              mountPath: /data
+              subPath: ""
+  {{- if .Values.pushgateway.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: pushgateway-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      {{- if .Values.pushgateway.persistence.storageClass }}
+      {{- if (eq "-" .Values.pushgateway.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.pushgateway.persistence.storageClass }}"
+      {{- end }}
+      {{- end }}
+      resources:
+        requests:
+          storage: "{{ .Values.pushgateway.persistence.size }}"
+  {{- else }}
+      volumes:
+      - name: pushgateway-data
+        emptyDir: {}
+  {{- end }}
+{{- end -}}
