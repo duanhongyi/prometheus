@@ -523,49 +523,6 @@ prometheusFiles:
           - source_labels: [__meta_kubernetes_pod_phase]
             regex: Pending|Succeeded|Failed|Completed
             action: drop
-       # todo annotations or as follows
-#      - job_name: 'drycc-storage-meta-pd'
-#        kubernetes_sd_configs:
-#          - role: pod
-#        relabel_configs:
-#          - source_labels:
-#              - __meta_kubernetes_pod_label_app
-#            regex: drycc-storage-meta-pd
-#            action: keep
-#          - source_labels: [ __meta_kubernetes_pod_ip ]
-#            regex: (.+)
-#            target_label: __address__
-#            replacement: ${1}:2379
-#          - source_labels: [ __meta_kubernetes_endpoints_name ]
-#            action: replace
-#            target_label: endpoint
-#          - source_labels: [ __meta_kubernetes_pod_name ]
-#            action: replace
-#            target_label: pod
-#          - source_labels: [ __meta_kubernetes_namespace ]
-#            action: replace
-#            target_label: namespace
-#      - job_name: 'drycc-storage-meta-tikv'
-#        kubernetes_sd_configs:
-#          - role: pod
-#        relabel_configs:
-#          - source_labels:
-#              - __meta_kubernetes_pod_label_app
-#            regex: drycc-storage-meta-tikv
-#            action: keep
-#          - source_labels: [ __meta_kubernetes_pod_ip ]
-#            regex: (.+)
-#            target_label: __address__
-#            replacement: ${1}:20180
-#          - source_labels: [ __meta_kubernetes_endpoints_name ]
-#            action: replace
-#            target_label: endpoint
-#          - source_labels: [ __meta_kubernetes_pod_name ]
-#            action: replace
-#            target_label: pod
-#          - source_labels: [ __meta_kubernetes_namespace ]
-#            action: replace
-#            target_label: namespace
 
 global:
   # Admin email, used for each component to send email to administrator

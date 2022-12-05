@@ -1,20 +1,19 @@
-{{- if and .Values.rbac.create .Values.rbac.useClusterRole -}}
-apiVersion: rbac.authorization.k8s.io/v1
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- if (index .Values "exporters" "kube-state-metrics" "enabled") }}
 kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
+  name: {{ printf "%s:kube-state-metrics" .Release.Namespace | quote }}
   labels:
-    {{- include "kube-state-metrics.labels" . | indent 4 }}
-  name: {{ template "kube-state-metrics.fullname" . }}
+    app: kube-state-metrics
+    heritage: drycc
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-{{- if .Values.rbac.useExistingRole }}
-  name: {{ .Values.rbac.useExistingRole }}
-{{- else }}
-  name: {{ template "kube-state-metrics.fullname" . }}
-{{- end }}
+  name: {{ printf "%s:kube-state-metrics" .Release.Namespace | quote }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "kube-state-metrics.serviceAccountName" . }}
-  namespace: {{ template "kube-state-metrics.namespace" . }}
+  name: kube-state-metrics
+  namespace: {{ .Release.Namespace }}
+{{- end -}}
 {{- end -}}

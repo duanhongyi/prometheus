@@ -1,196 +1,188 @@
-{{- if and (eq .Values.rbac.create true) (not .Values.rbac.useExistingRole) -}}
-{{- range (ternary (join "," .Values.namespaces | split "," ) (list "") (eq $.Values.rbac.useClusterRole false)) }}
+{{- if eq .Values.global.prometheusLocation "on-cluster" }}
+{{- if (index .Values "exporters" "kube-state-metrics" "enabled") }}
+{{- $collectors := (index .Values "kube-state-metrics" "collectors" ) }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-{{- if eq $.Values.rbac.useClusterRole false }}
-kind: Role
-{{- else }}
 kind: ClusterRole
-{{- end }}
 metadata:
   labels:
-    {{- include "kube-state-metrics.labels" $ | indent 4 }}
-  name: {{ template "kube-state-metrics.fullname" $ }}
-{{- if eq $.Values.rbac.useClusterRole false }}
-  namespace: {{ . }}
-{{- end }}
+    app: kube-state-metrics
+    heritage: drycc
+  name: {{ printf "%s:kube-state-metrics" .Release.Namespace | quote }}
 rules:
-{{ if has "certificatesigningrequests" $.Values.collectors }}
+{{- if has "certificatesigningrequests" $collectors }}
 - apiGroups: ["certificates.k8s.io"]
   resources:
   - certificatesigningrequests
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "configmaps" $.Values.collectors }}
+{{- end }}
+{{- if has "configmaps" $collectors }}
 - apiGroups: [""]
   resources:
   - configmaps
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "cronjobs" $.Values.collectors }}
+{{- end }}
+{{- if has "cronjobs" $collectors }}
 - apiGroups: ["batch"]
   resources:
   - cronjobs
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "daemonsets" $.Values.collectors }}
+{{- end }}
+{{- if has "daemonsets" $collectors }}
 - apiGroups: ["extensions", "apps"]
   resources:
   - daemonsets
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "deployments" $.Values.collectors }}
+{{- end }}
+{{- if has "deployments" $collectors }}
 - apiGroups: ["extensions", "apps"]
   resources:
   - deployments
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "endpoints" $.Values.collectors }}
+{{- end }}
+{{- if has "endpoints" $collectors }}
 - apiGroups: [""]
   resources:
   - endpoints
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "horizontalpodautoscalers" $.Values.collectors }}
+{{- end }}
+{{- if has "horizontalpodautoscalers" $collectors }}
 - apiGroups: ["autoscaling"]
   resources:
   - horizontalpodautoscalers
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "ingresses" $.Values.collectors }}
+{{- end }}
+{{- if has "ingresses" $collectors }}
 - apiGroups: ["extensions", "networking.k8s.io"]
   resources:
   - ingresses
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "jobs" $.Values.collectors }}
+{{- end }}
+{{- if has "jobs" $collectors }}
 - apiGroups: ["batch"]
   resources:
   - jobs
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "leases" $.Values.collectors }}
+{{- end }}
+{{- if has "leases" $collectors }}
 - apiGroups: ["coordination.k8s.io"]
   resources:
   - leases
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "limitranges" $.Values.collectors }}
+{{- end }}
+{{- if has "limitranges" $collectors }}
 - apiGroups: [""]
   resources:
   - limitranges
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "mutatingwebhookconfigurations" $.Values.collectors }}
+{{- end }}
+{{- if has "mutatingwebhookconfigurations" $collectors }}
 - apiGroups: ["admissionregistration.k8s.io"]
   resources:
     - mutatingwebhookconfigurations
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "namespaces" $.Values.collectors }}
+{{- end }}
+{{- if has "namespaces" $collectors }}
 - apiGroups: [""]
   resources:
   - namespaces
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "networkpolicies" $.Values.collectors }}
+{{- end }}
+{{- if has "networkpolicies" $collectors }}
 - apiGroups: ["networking.k8s.io"]
   resources:
   - networkpolicies
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "nodes" $.Values.collectors }}
+{{- end }}
+{{- if has "nodes" $collectors }}
 - apiGroups: [""]
   resources:
   - nodes
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "persistentvolumeclaims" $.Values.collectors }}
+{{- end }}
+{{- if has "persistentvolumeclaims" $collectors }}
 - apiGroups: [""]
   resources:
   - persistentvolumeclaims
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "persistentvolumes" $.Values.collectors }}
+{{- end }}
+{{- if has "persistentvolumes" $collectors }}
 - apiGroups: [""]
   resources:
   - persistentvolumes
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "poddisruptionbudgets" $.Values.collectors }}
+{{- end }}
+{{- if has "poddisruptionbudgets" $collectors }}
 - apiGroups: ["policy"]
   resources:
     - poddisruptionbudgets
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "pods" $.Values.collectors }}
+{{- end }}
+{{- if has "pods" $collectors }}
 - apiGroups: [""]
   resources:
   - pods
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "replicasets" $.Values.collectors }}
+{{- end }}
+{{- if has "replicasets" $collectors }}
 - apiGroups: ["extensions", "apps"]
   resources:
   - replicasets
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "replicationcontrollers" $.Values.collectors }}
+{{- end }}
+{{- if has "replicationcontrollers" $collectors }}
 - apiGroups: [""]
   resources:
   - replicationcontrollers
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "resourcequotas" $.Values.collectors }}
+{{- end }}
+{{- if has "resourcequotas" $collectors }}
 - apiGroups: [""]
   resources:
   - resourcequotas
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "secrets" $.Values.collectors }}
+{{- end }}
+{{- if has "secrets" $collectors }}
 - apiGroups: [""]
   resources:
   - secrets
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "services" $.Values.collectors }}
+{{- end }}
+{{- if has "services" $collectors }}
 - apiGroups: [""]
   resources:
   - services
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "statefulsets" $.Values.collectors }}
+{{- end }}
+{{- if has "statefulsets" $collectors }}
 - apiGroups: ["apps"]
   resources:
   - statefulsets
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "storageclasses" $.Values.collectors }}
+{{- end }}
+{{- if has "storageclasses" $collectors }}
 - apiGroups: ["storage.k8s.io"]
   resources:
     - storageclasses
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "validatingwebhookconfigurations" $.Values.collectors }}
+{{- end }}
+{{- if has "validatingwebhookconfigurations" $collectors }}
 - apiGroups: ["admissionregistration.k8s.io"]
   resources:
     - validatingwebhookconfigurations
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "volumeattachments" $.Values.collectors }}
+{{- end }}
+{{- if has "volumeattachments" $collectors }}
 - apiGroups: ["storage.k8s.io"]
   resources:
     - volumeattachments
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if has "verticalpodautoscalers" $.Values.collectors }}
+{{- end }}
+{{- if has "verticalpodautoscalers" $collectors }}
 - apiGroups: ["autoscaling.k8s.io"]
   resources:
     - verticalpodautoscalers
   verbs: ["list", "watch"]
-{{ end -}}
-{{ if $.Values.rbac.extraRules }}
-{{ toYaml $.Values.rbac.extraRules }}
-{{ end }}
+{{- end }}
 {{- end -}}
 {{- end -}}
