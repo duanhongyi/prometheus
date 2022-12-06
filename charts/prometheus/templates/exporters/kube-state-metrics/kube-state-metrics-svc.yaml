@@ -6,8 +6,8 @@ metadata:
   name: drycc-kube-state-metrics
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/path: /metrics
-    prometheus.io/port: 8080
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8080"
     {{- with index .Values "kube-state-metrics" "service" "annotations" }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

@@ -6,8 +6,8 @@ metadata:
   name: drycc-node-exporter
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/path: /metrics
-    prometheus.io/port: 9100
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "9100"
     {{- with (index .Values "node-exporter" "annotations") }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

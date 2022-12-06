@@ -11,11 +11,6 @@ metadata:
 spec:
   serviceName: drycc-prometheus-headless
   replicas: {{ .Values.prometheus.replicas }}
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-    type: RollingUpdate
   selector:
     matchLabels:
       app: drycc-prometheus
@@ -24,6 +19,7 @@ spec:
       labels:
         app: drycc-prometheus
     spec:
+      serviceAccount: drycc-prometheus
       affinity:
         podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAffinityPreset.type "key" .Values.prometheus.podAffinityPreset.key "values" .Values.prometheus.podAffinityPreset.values ) | nindent 10 }}
         podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAntiAffinityPreset.type "key" .Values.prometheus.podAntiAffinityPreset.key "values" .Values.prometheus.podAntiAffinityPreset.values ) | nindent 10 }}
