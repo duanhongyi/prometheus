@@ -1,5 +1,5 @@
 {{- if eq .Values.global.prometheusLocation "on-cluster" }}
-{{- if (index .Values "exporters" "kube-state-metrics" "enabled") }}
+{{- if (index .Values "kube-state-metrics" "enabled") }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

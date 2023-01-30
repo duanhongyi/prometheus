@@ -1,5 +1,5 @@
 {{- if eq .Values.global.prometheusLocation "on-cluster" }}
-{{- if (index .Values "exporters" "node-exporter" "enabled") }}
+{{- if (index .Values "node-exporter" "enabled") }}
 apiVersion: v1
 kind: Service
 metadata:
