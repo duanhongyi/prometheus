@@ -5,18 +5,13 @@ ENV DRYCC_UID=1001 \
   DRYCC_HOME_DIR=/data \
   PROMETHEUS_VERSION="2.40.3" \
   NODE_EXPORTER_VERSION="1.4.0" \
-  KUBE_STATE_METRICS="2.7.0" \
-  CONFIGMAP_RELOAD="0.8.0"
-
-
-COPY . /
+  KUBE_STATE_METRICS="2.7.0"
 
 RUN groupadd drycc --gid ${DRYCC_GID} \
   && useradd drycc -u ${DRYCC_UID} -g ${DRYCC_GID} -s /bin/bash -m -d ${DRYCC_HOME_DIR} \
   && install-stack prometheus $PROMETHEUS_VERSION \
   && install-stack node_exporter $NODE_EXPORTER_VERSION \
   && install-stack kube-state-metrics $KUBE_STATE_METRICS \
-  && install-stack configmap-reload $CONFIGMAP_RELOAD \
   && rm -rf \
       /usr/share/doc \
       /usr/share/man \
@@ -32,6 +27,8 @@ RUN groupadd drycc --gid ${DRYCC_GID} \
       /usr/lib/`echo $(uname -m)`-linux-gnu/gconv/EBC* \
       /var/cache/apk/* /root/.gem/ruby/*/cache/*.gem \
   && bash -c "mkdir -p /usr/share/man/man{1..8}"
+
+COPY rootfs /
 
 VOLUME ${DRYCC_HOME_DIR}
 
