@@ -36,7 +36,7 @@ test: test-style
 test-style:
 	${TEST_ENV_PREFIX} bash -c "set -eou pipefail; flake8 --exclude .venv --show-source"
 
-.PHONY: build push docker-build clean upgrade deploy test test-style
+.PHONY: build push docker-build clean deploy test test-style
 
 build-all:
 	docker build ${DOCKER_BUILD_FLAGS} -t ${DRYCC_REGISTRY}/${IMAGE_PREFIX}/prometheus:${VERSION}

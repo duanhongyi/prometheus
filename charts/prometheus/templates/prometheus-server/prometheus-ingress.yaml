@@ -15,7 +15,7 @@ spec:
   ingressClassName: "{{ .Values.global.ingressClass }}"
   {{- end }}
   rules:
-  - host: drycc.{{ .Values.global.platformDomain }}
+  - host: drycc-prometheus.{{ .Values.global.platformDomain }}
     http:
       paths:
       - pathType: Prefix

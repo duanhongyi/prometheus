@@ -33,6 +33,3 @@ COPY rootfs /
 VOLUME ${DRYCC_HOME_DIR}
 
 USER ${DRYCC_UID}
-
-# Expose the gateway port
-EXPOSE 8000

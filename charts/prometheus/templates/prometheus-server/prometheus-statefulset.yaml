@@ -42,7 +42,11 @@ spec:
           {{- range $key, $value := .Values.prometheus-server.extraArgs }}
           - --{{ $key }}={{ $value }}
           {{- end }}
-          - --web.external-url=http://prometheus.{{ $platformDomain }}
+          {{- if .Values.global.certManagerEnabled }}
+          - --web.external-url=https://drycc-prometheus.{{ $platformDomain }}
+          {{- else }}
+          - --web.external-url=http://drycc-prometheus.{{ $platformDomain }}
+          {{- end }}
         livenessProbe:
           failureThreshold: 10
           httpGet:

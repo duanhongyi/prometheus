@@ -6,7 +6,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    app: kube-state-metrics
+    app: drycc-kube-state-metrics
     heritage: drycc
   name: {{ printf "%s:drycc-kube-state-metrics" .Release.Namespace | quote }}
 rules:
