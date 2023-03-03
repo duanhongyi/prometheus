@@ -163,3 +163,4 @@ global:
   # Whether cert_manager is enabled to automatically generate controller certificates
   certManagerEnabled: true
   prometheusLocation: "on-cluster"
+  ingressClass: ""

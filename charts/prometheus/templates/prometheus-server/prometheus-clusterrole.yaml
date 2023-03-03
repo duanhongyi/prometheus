@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: drycc-prometheus
+  name: name: {{ printf "%s:drycc-prometheus" .Release.Namespace | quote }}
   labels:
     app: drycc-prometheus
     heritage: drycc

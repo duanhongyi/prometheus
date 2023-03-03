@@ -28,7 +28,7 @@ spec:
           service:
             name: drycc-prometheus
             port:
-              number: 80
+              number: 9090
   {{- if .Values.global.certManagerEnabled }}
   tls:
     - secretName: drycc-prometheus-certificate-auto
