@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: drycc-prometheus-headless
   annotations:
-    {{- with .Values.prometheus-server.service.annotations }}
+    {{- with (index .Values "prometheus-server" "service" "annotations") }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:

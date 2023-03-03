@@ -13,7 +13,7 @@ TEST_ENV_PREFIX := docker run --rm -v ${CURDIR}:/bash -w /bash ${DEV_REGISTRY}/d
 
 build: docker-build
 push: docker-push
-deploy: docker-build docker-push install
+deploy: docker-build docker-push
 
 check-docker:
 	@if [ -z $$(which docker) ]; then \
@@ -31,12 +31,9 @@ docker-buildx:
 clean: check-docker
 	docker rmi $(IMAGE)
 	
-test: test-style
+test: docker-build
 
-test-style:
-	${TEST_ENV_PREFIX} bash -c "set -eou pipefail; flake8 --exclude .venv --show-source"
-
-.PHONY: build push docker-build clean deploy test test-style
+.PHONY: build push docker-build clean deploy test
 
 build-all:
 	docker build ${DOCKER_BUILD_FLAGS} -t ${DRYCC_REGISTRY}/${IMAGE_PREFIX}/prometheus:${VERSION}

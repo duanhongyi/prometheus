@@ -71,11 +71,13 @@ spec:
         {{- if (index .Values "kube-state-metrics" "kubeconfig" "enabled") }}
         - --kubeconfig=/opt/k8s/.kube/config
         {{- end }}
+        {{- if (index .Values "kube-state-metrics" "selfMonitor" "enabled") }}
         {{- if (index .Values "kube-state-metrics" "selfMonitor" "telemetryHost") }}
         - --telemetry-host={{ index .Values "kube-state-metrics" "selfMonitor" "telemetryHost" }}
         {{- end }}
         {{- if (index .Values "kube-state-metrics" "selfMonitor" "telemetryPort") }}
         - --telemetry-port={{ index .Values "kube-state-metrics" "selfMonitor" "telemetryPort" | default 8081 }}
+        {{- end }}
         {{- end }}
         env:
           - name: POD_NAME

@@ -10,7 +10,7 @@ metadata:
     component.drycc.cc/version: {{ .Values.imageTag }}
 spec:
   serviceName: drycc-prometheus-headless
-  replicas: {{ .Values.prometheus-server.replicas }}
+  replicas: {{ index .Values "prometheus-server" "replicas" }}
   selector:
     matchLabels:
       app: drycc-prometheus
@@ -21,9 +21,9 @@ spec:
     spec:
       serviceAccount: drycc-prometheus
       affinity:
-        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus-server.podAffinityPreset.type "key" .Values.prometheus-server.podAffinityPreset.key "values" .Values.prometheus-server.podAffinityPreset.values ) | nindent 10 }}
-        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus-server.podAntiAffinityPreset.type "key" .Values.prometheus-server.podAntiAffinityPreset.key "values" .Values.prometheus-server.podAntiAffinityPreset.values ) | nindent 10 }}
-        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.prometheus-server.nodeAffinityPreset.type "key" .Values.prometheus-server.nodeAffinityPreset.key "values" .Values.prometheus-server.nodeAffinityPreset.values ) | nindent 10 }}
+        podAffinity: {{- include "common.affinities.pods" (dict "type" ( index .Values "prometheus-server" "podAffinityPreset" "type") "key" ( index .Values "prometheus-server" "podAffinityPreset" "key") "values" ( index .Values "prometheus-server" "podAffinityPreset" "values" ) ) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" ( index .Values "prometheus-server" "podAntiAffinityPreset" "type") "key" ( index .Values "prometheus-server" "podAntiAffinityPreset" "key") "values" ( index .Values "prometheus-server" "podAntiAffinityPreset" "values" ) ) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" ( index .Values "prometheus-server" "nodeAffinityPreset" "type") "key" ( index .Values "prometheus-server" "nodeAffinityPreset" "key") "values" ( index .Values "prometheus-server" "nodeAffinityPreset" "values" ) ) | nindent 10 }}
       containers:
       - name: drycc-prometheus
         image: {{ .Values.imageRegistry }}/{{ .Values.imageOrg }}/prometheus:{{ .Values.imageTag }}
@@ -31,15 +31,15 @@ spec:
         args:
           - prometheus
           - --web.route-prefix=/
-          - --storage.tsdb.retention.time={{ .Values.prometheus-server.retention }}
+          - --storage.tsdb.retention.time={{ index .Values "prometheus-server" "retention" }}
           - --config.file=/opt/drycc/prometheus/config/prometheus.yaml
           - --storage.tsdb.path=/data
           - --web.console.libraries=/opt/drycc/console_libraries
           - --web.console.templates=/opt/drycc/prometheus/consoles
-          {{- range .Values.prometheus-server.extraFlags }}
+          {{- range (index .Values "prometheus-server" "extraFlags" ) }}
           - --{{ . }}
           {{- end }}
-          {{- range $key, $value := .Values.prometheus-server.extraArgs }}
+          {{- range $key, $value := (index .Values "prometheus-server" "extraArgs" ) }}
           - --{{ $key }}={{ $value }}
           {{- end }}
           {{- if .Values.global.certManagerEnabled }}
@@ -79,7 +79,7 @@ spec:
           periodSeconds: 15
           successThreshold: 1
           timeoutSeconds: 3
-  {{- if not .Values.prometheus-server.persistence.enabled }}
+  {{- if not (index .Values "prometheus-server" "persistence" "enabled") }}
         - name: prometheus-data
           emptyDir: {}
   {{- else }}
@@ -88,15 +88,15 @@ spec:
       name: prometheus-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      {{- if .Values.prometheus-server.persistence.storageClass }}
-      {{- if (eq "-" .Values.prometheus-server.persistence.storageClass) }}
+      {{- if (index .Values "prometheus-server" "persistence" "storageClass") }}
+      {{- if (eq "-" (index .Values "prometheus-server" "persistence" "storageClass")) }}
       storageClassName: ""
       {{- else }}
-      storageClassName: "{{ .Values.prometheus-server.persistence.storageClass }}"
+      storageClassName: "{{ (index .Values "prometheus-server" "persistence" "storageClass") }}"
       {{- end }}
       {{- end }}
       resources:
         requests:
-          storage: {{ .Values.prometheus-server.persistence.size | quote }}
+          storage: {{ (index .Values "prometheus-server" "persistence" "size") | quote }}
   {{- end }}
 {{- end }}
